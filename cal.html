@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calendar App - Monthly View</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background-color: #E6F0FA;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .app-container {
+      width: 375px;
+      height: 667px;
+      background-color: #E9FCF5;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+      position: relative;
+      padding-bottom: 60px; /* Space for fixed nav-bar */
+    }
+
+    .header {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      background-color: #fff;
+      border-bottom: 1px solid #C0E8E0;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .notification {
+      position: absolute;
+      right: 20px;
+      top: 15px;
+      font-size: 22px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .view-buttons {
+      padding: 15px;
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+    }
+
+    .view-buttons button {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      background-color: #D1E3F6;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .view-buttons button:hover {
+      background-color: #6CB9D8;
+      transform: translateY(-1px);
+    }
+
+    .view-buttons button.active {
+      background-color: #87CEEB;
+      color: #fff;
+      box-shadow: 0 2px 5px rgba(135, 206, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .calendar-placeholder {
+      flex: 1;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    .calendar-view {
+      padding: 15px;
+      display: block;
+    }
+
+    .weekly-view {
+      padding: 15px;
+      display: none;
+    }
+
+    .weekly-view h2 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .weekly-todo-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .weekly-todo-item {
+      background-color: #FFE4E4; /* Pastel pink */
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .calendar-header h2 {
+      font-size: 18px;
+      color: #333;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      text-align: center;
+    }
+
+    .calendar-grid div {
+      padding: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .calendar-grid .day-name {
+      font-weight: bold;
+      color: #666;
+    }
+
+    .calendar-grid .day {
+      background-color: #D1E3F6;
+      border-radius: 5px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .calendar-grid .day:hover {
+      background-color: #87CEEB;
+      color: #fff;
+    }
+
+    .calendar-grid .today {
+      background-color: #D1E3F6;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .calendar-grid .memo-fold {
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .calendar-grid .memo-fold::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-top: 10px solid #FFFFFF;
+      border-right: 10px solid transparent;
+      z-index: 1;
+    }
+
+    .calendar-grid .memo-fold:hover {
+      background-color: #87CEEB;
+    }
+
+    .calendar-grid .memo-fold:hover::before {
+      border-top-color: #87CEEB;
+    }
+
+    .add-event-btn {
+      position: fixed;
+      bottom: 80px;
+      right: calc(50% - 165px); /* Center within 375px width */
+      width: 60px;
+      height: 60px;
+      background-color: #87CEEB;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .add-event-btn:hover {
+      background-color: #6CB9D8;
+      transform: scale(1.1);
+    }
+
+    .add-event-btn:active {
+      transform: scale(0.95);
+    }
+
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: calc(50% - 187.5px); /* Center within 375px width */
+      right: calc(50% - 187.5px);
+      width: 375px;
+      height: 60px;
+      background-color: #fff;
+      border-top: 1px solid #D1E3F6;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .nav-bar a {
+      text-decoration: none;
+      color: #666;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .emoji {
+      font-size: 20px;
+      display: block;
+      transform: translateY(2px);
+    }
+
+    .nav-bar a.active {
+      color: #87CEEB;
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+
+    .popup-content h3 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .popup-content p {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 20px;
+      max-height: 100px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #D1E3F6;
+      border-radius: 5px;
+      background-color: #D1E3F6;
+    }
+
+    .popup-content button {
+      padding: 10px 20px;
+      background-color: #87CEEB;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .popup-content button:hover {
+      background-color: #6CB9D8;
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .month-grid button {
+      padding: 10px;
+      font-size: 14px;
+      background-color: #D1E3F6;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .month-grid button:hover {
+      background-color: #87CEEB;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <span>⬅️</span>
+      <h1>월간 일정</h1>
+      <a href="noti.html" class="notification">🔔</a>
+    </div>
+
+    <div class="view-buttons">
+      <button id="monthlyViewBtn" class="active">월간 캘린더 뷰</button>
+      <button id="weeklyViewBtn">주간 일정</button>
+    </div>
+
+    <div id="calendarPlaceholder" class="calendar-placeholder">캘린더</div>
+
+    <div id="calendarView" class="calendar-view">
+      <div class="calendar-header">
+        <h2 id="calendarMonthYear"></h2>
+      </div>
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </div>
+
+    <div id="weeklyView" class="weekly-view">
+      <h2 id="weeklyTitle"></h2>
+      <div id="weeklyTodoList" class="weekly-todo-list"></div>
+    </div>
+
+    <div class="add-event-btn" id="addEventBtn">+</div>
+
+    <div class="nav-bar">
+      <a href="main.html"><span class="emoji">🏠</span><span>홈</span></a>
+      <a href="status.html"><span class="emoji">📊</span><span>리포트</span></a>
+      <a href="cal.html" class="active"><span class="emoji">📅</span><span>캘린더</span></a>
+      <a href="todo.html"><span class="emoji">📝</span><span>할일</span></a>
+      <a href="set.html"><span class="emoji">⚙️</span><span>설정</span></a>
+    </div>
+  </div>
+
+  <div id="monthPopup" class="popup">
+    <div class="popup-content">
+      <h3>2025년 월 선택</h3>
+      <div class="month-grid">
+        <button onclick="selectMonth(1)">1월</button>
+        <button onclick="selectMonth(2)">2월</button>
+        <button onclick="selectMonth(3)">3월</button>
+        <button onclick="selectMonth(4)">4월</button>
+        <button onclick="selectMonth(5)">5월</button>
+        <button onclick="selectMonth(6)">6월</button>
+        <button onclick="selectMonth(7)">7월</button>
+        <button onclick="selectMonth(8)">8월</button>
+        <button onclick="selectMonth(9)">9월</button>
+        <button onclick="selectMonth(10)">10월</button>
+        <button onclick="selectMonth(11)">11월</button>
+        <button onclick="selectMonth(12)">12월</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="feedbackPopup" class="popup">
+    <div class="popup-content">
+      <h3 id="popup-date"></h3>
+      <p id="feedbackText">작성된 피드백이 없습니다.</p>
+      <button onclick="closeFeedbackPopup()">닫기</button>
+    </div>
+  </div>
+
+  <script>
+    const monthlyViewBtn = document.getElementById('monthlyViewBtn');
+    const weeklyViewBtn = document.getElementById('weeklyViewBtn');
+    const calendarPlaceholder = document.getElementById('calendarPlaceholder');
+    const calendarView = document.getElementById('calendarView');
+    const weeklyView = document.getElementById('weeklyView');
+    const calendarMonthYear = document.getElementById('calendarMonthYear');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const weeklyTitle = document.getElementById('weeklyTitle');
+    const weeklyTodoList = document.getElementById('weeklyTodoList');
+    const monthPopup = document.getElementById('monthPopup');
+    const addEventBtn = document.getElementById('addEventBtn');
+
+    window.onload = () => {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth() + 1;
+      generateCalendar(currentYear, currentMonth);
+    };
+
+    addEventBtn.addEventListener('click', () => {
+      window.location.href = 'addtodo.html';
+    });
+
+    function setActiveButton(activeBtn) {
+      [monthlyViewBtn, weeklyViewBtn].forEach(btn => {
+        btn.classList.remove('active');
+      });
+      activeBtn.classList.add('active');
+    }
+
+    monthlyViewBtn.addEventListener('click', () => {
+      monthPopup.style.display = 'flex';
+      setActiveButton(monthlyViewBtn);
+    });
+
+    weeklyViewBtn.addEventListener('click', () => {
+      calendarView.style.display = 'none';
+      calendarPlaceholder.style.display = 'none';
+      weeklyView.style.display = 'block';
+      setActiveButton(weeklyViewBtn);
+      generateWeeklyTodos();
+    });
+
+    function selectMonth(month) {
+      monthPopup.style.display = 'none';
+      calendarPlaceholder.style.display = 'none';
+      calendarView.style.display = 'block';
+      weeklyView.style.display = 'none';
+      setActiveButton(monthlyViewBtn);
+      generateCalendar(2025, month);
+    }
+
+    function generateCalendar(year, month) {
+      const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+      calendarMonthYear.textContent = `${year}년 ${months[month - 1]}`;
+
+      calendarGrid.innerHTML = '';
+
+      const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+      daysOfWeek.forEach(day => {
+        const dayName = document.createElement('div');
+        dayName.className = 'day-name';
+        dayName.textContent = day;
+        calendarGrid.appendChild(dayName);
+      });
+
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const lastDate = new Date(year, month, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        calendarGrid.appendChild(emptyDay);
+      }
+
+      for (let day = 1; day <= lastDate; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'day';
+
+        const today = new Date();
+        if (
+          day === today.getDate() &&
+          month - 1 === today.getMonth() &&
+          year === today.getFullYear()
+        ) {
+          dayElement.classList.add('today');
+        }
+
+        const feedbackKey = `feedback-${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const feedback = localStorage.getItem(feedbackKey);
+        if (feedback) {
+          dayElement.classList.add('memo-fold');
+        }
+
+        const dateSpan = document.createElement('span');
+        dateSpan.textContent = day;
+
+        const dateKey = `rate-${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const rate = localStorage.getItem(dateKey);
+
+        const emojiSpan = document.createElement('span');
+        emojiSpan.className = 'emoji';
+        if (rate === '100') {
+          emojiSpan.textContent = '😊';
+          emojiSpan.style.marginLeft = '4px';
+        }
+
+        dayElement.appendChild(dateSpan);
+        dayElement.appendChild(emojiSpan);
+
+        dayElement.addEventListener('click', () => {
+          showFeedbackPopup(`${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+        });
+
+        calendarGrid.appendChild(dayElement);
+      }
+    }
+
+    function generateWeeklyTodos() {
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      const dayOfWeek = today.getDay();
+      startOfWeek.setDate(today.getDate() - dayOfWeek); // Start from Sunday
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+
+      weeklyTitle.textContent = `${startOfWeek.getFullYear()}년 ${startOfWeek.getMonth() + 1}월 ${startOfWeek.getDate()}일 - ${endOfWeek.getDate()}일`;
+      weeklyTodoList.innerHTML = '';
+
+      let hasTodos = false;
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(startOfWeek);
+        currentDate.setDate(startOfWeek.getDate() + i);
+        const dateKey = `todo-${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+        const todos = JSON.parse(localStorage.getItem(dateKey)) || [];
+
+        todos.forEach(todo => {
+          const todoItem = document.createElement('div');
+          todoItem.className = 'weekly-todo-item';
+          const todoTitle = todo.title || '제목 없음';
+          todoItem.textContent = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}: ${todoTitle}`;
+          weeklyTodoList.appendChild(todoItem);
+          hasTodos = true;
+        });
+      }
+
+      if (!hasTodos) {
+        const noTodo = document.createElement('div');
+        noTodo.className = 'weekly-todo-item';
+        noTodo.textContent = '이번 주에 등록된 할 일이 없습니다.';
+        weeklyTodoList.appendChild(noTodo);
+      }
+    }
+
+    function showFeedbackPopup(date) {
+      const feedback = localStorage.getItem(`feedback-${date}`);
+      const popup = document.getElementById('feedbackPopup');
+      const feedbackText = document.getElementById('feedbackText');
+      const popupDate = document.getElementById('popup-date');
+
+      popupDate.textContent = date;
+      feedbackText.textContent = feedback || '작성된 피드백이 없습니다.';
+      popup.style.display = 'flex';
+    }
+
+    function closeFeedbackPopup() {
+      document.getElementById('feedbackPopup').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #E6F0FA;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 375px;
+            height: 667px;
+            background-color: #E9FCF5;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            position: relative;
+            padding-bottom: 60px; /* Space for fixed nav-bar */
+        }
+
+        .header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #fff;
+            border-bottom: 1px solid #D1E3F6;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .notification {
+            position: absolute;
+            right: 20px;
+            top: 13px;
+            font-size: 22px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .profile-section {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #D1E3F6;
+        }
+
+        .profile-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            flex-grow: 1;
+        }
+
+        .circular-progress-container {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            order: -1;
+        }
+
+        .circular-progress {
+            transform: rotate(-90deg);
+        }
+
+        .circular-progress-bg {
+            fill: none;
+            stroke: #A9D5F2;
+            stroke-width: 8;
+        }
+
+        .circular-progress-fill {
+            fill: none;
+            stroke: #87CEEB;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.5s ease;
+        }
+
+        .circular-progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stats-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stats-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .progress-cards {
+            display: flex;
+            gap: 15px;
+        }
+
+        .progress-card {
+            flex: 1;
+            padding: 15px;
+            background-color: #D1E3F6;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-card .label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .progress-card .description {
+            font-size: 14px;
+            color: #333;
+            text-align: center;
+        }
+
+        .todo-stats-section {
+            padding: 20px;
+        }
+
+        .stats-box {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .stats-box:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-box h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-box h3::before {
+            content: '📊';
+            font-size: 20px;
+        }
+
+        .stats-box ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .stats-box ul li {
+            padding: 12px;
+            border-bottom: 1px solid #D1E3F6;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .stats-box ul li:hover {
+            background-color: #E9FCF5;
+        }
+
+        .stats-box ul li::before {
+            content: '✅';
+            font-size: 14px;
+        }
+
+        .stats-box.todo-item {
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+        }
+
+        .stats-box.todo-item p {
+            font-size: 14px;
+            color: #333;
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        .stats-box.todo-item span {
+            font-size: 16px;
+        }
+
+        .stats-box.todo-item:hover {
+            background-color: #E9FCF5;
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: calc(50% - 187.5px); /* Center within 375px width */
+            right: calc(50% - 187.5px);
+            width: 375px;
+            height: 60px;
+            background-color: #fff;
+            border-top: 1px solid #D1E3F6;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-bar a {
+            text-decoration: none;
+            color: #666;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            padding: 5px 0;
+        }
+
+        .nav-bar a.active {
+            color: #87CEEB;
+        }
+
+        .emoji {
+            font-size: 20px;
+            display: block;
+            transform: translateY(2px);
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .popup-content h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .popup-content h3::before {
+            content: '📋';
+            font-size: 20px;
+        }
+
+        .popup-content ul {
+            list-style: none;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .popup-content ul li {
+            padding: 10px;
+            border-bottom: 1px solid #D1E3F6;
+            color: #333;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .popup-content ul li:hover {
+            background-color: #E9FCF5;
+        }
+
+        .popup-content button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #87CEEB;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .popup-content button:hover {
+            background-color: #6CB9D8;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <a href="main.html">⬅️</a>
+            <h1>리포트</h1>
+            <a class="notification" href="noti.html">🔔</a>
+        </div>
+        <div class="profile-section">
+            <div class="circular-progress-container">
+                <svg class="circular-progress" width="60" height="60">
+                    <circle class="circular-progress-bg" cx="30" cy="30" r="26"/>
+                    <circle class="circular-progress-fill" cx="30" cy="30" r="26" stroke-dasharray="0 163.362" stroke-dashoffset="0"/>
+                </svg>
+                <div class="circular-progress-text" id="today-progress-text">0%</div>
+            </div>
+            <div class="profile-text">오늘의 목표율</div>
+        </div>
+        <div class="stats-container">
+            <div class="stats-title">목표 달성률</div>
+            <div class="progress-cards">
+                <div class="progress-card">
+                    <div class="circular-progress-container">
+                        <svg class="circular-progress" width="60" height="60">
+                            <circle class="circular-progress-bg" cx="30" cy="30" r="26"/>
+                            <circle class="circular-progress-fill" cx="30" cy="30" r="26" stroke-dasharray="0 163.362" stroke-dashoffset="0"/>
+                        </svg>
+                        <div class="circular-progress-text" id="weekly-progress-text">0%</div>
+                    </div>
+                    <div class="description">주간 달성률</div>
+                </div>
+                <div class="progress-card">
+                    <div class="circular-progress-container">
+                        <svg class="circular-progress" width="60" height="60">
+                            <circle class="circular-progress-bg" cx="30" cy="30" r="26"/>
+                            <circle class="circular-progress-fill" cx="30" cy="30" r="26" stroke-dasharray="0 163.362" stroke-dashoffset="0"/>
+                        </svg>
+                        <div class="circular-progress-text" id="monthly-progress-text">0%</div>
+                    </div>
+                    <div class="description">월간 달성률</div>
+                </div>
+            </div>
+        </div>
+        <div class="todo-stats-section">
+            <div class="stats-box">
+                <h3>통계</h3>
+                <ul id="todo-stats-list">
+                    <!-- Busiest/Least Busy Days, Frequent Todos -->
+                </ul>
+            </div>
+            <div class="stats-box todo-item" onclick="showPostponedList()">
+                <span>😊</span>
+                <p>미룬 To-Do 리스트</p>
+            </div>
+        </div>
+        <div class="nav-bar">
+            <a href="main.html"><span class="emoji">🏠</span><span>홈</span></a>
+            <a href="stat.html" class="active"><span class="emoji">📊</span><span>리포트</span></a>
+            <a href="cal.html"><span class="emoji">📅</span><span>캘린더</span></a>
+            <a href="todo.html"><span class="emoji">📝</span><span>할일</span></a>
+            <a href="set.html"><span class="emoji">⚙️</span><span>설정</span></a>
+        </div>
+    </div>
+
+    <!-- 미룬 To-Do 리스트 팝업 -->
+    <div id="postponedPopup" class="popup">
+        <div class="popup-content">
+            <h3>미룬 To-Do 리스트</h3>
+            <ul id="postponedList"></ul>
+            <button onclick="closePopup()">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        function updateCircularProgress(element, percentage) {
+            const circumference = 2 * Math.PI * 26;
+            const dashArray = (percentage / 100) * circumference;
+            element.setAttribute('stroke-dasharray', `${dashArray} ${circumference}`);
+        }
+
+        function calculateProgress() {
+            const today = new Date().toISOString().split('T')[0];
+            let weeklyTodos = 0, weeklyCompleted = 0;
+            let monthlyTodos = 0, monthlyCompleted = 0;
+
+            // Today's progress
+            const todayTodos = JSON.parse(localStorage.getItem(`todo-${today}`)) || [];
+            const todayCompleted = todayTodos.filter(todo => todo.checked).length;
+            const todayProgress = todayTodos.length > 0 ? Math.round((todayCompleted / todayTodos.length) * 100) : 0;
+
+            // Weekly progress (last 7 days)
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toISOString().split('T')[0];
+                const todos = JSON.parse(localStorage.getItem(`todo-${dateString}`)) || [];
+                weeklyTodos += todos.length;
+                weeklyCompleted += todos.filter(todo => todo.checked).length;
+            }
+            const weeklyProgress = weeklyTodos > 0 ? Math.round((weeklyCompleted / weeklyTodos) * 100) : 0;
+
+            // Monthly progress (last 30 days)
+            for (let i = 0; i < 30; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toISOString().split('T')[0];
+                const todos = JSON.parse(localStorage.getItem(`todo-${dateString}`)) || [];
+                monthlyTodos += todos.length;
+                monthlyCompleted += todos.filter(todo => todo.checked).length;
+            }
+            const monthlyProgress = monthlyTodos > 0 ? Math.round((monthlyCompleted / monthlyTodos) * 100) : 0;
+
+            // Update progress circles
+            updateCircularProgress(document.querySelector('.profile-section .circular-progress-fill'), todayProgress);
+            updateCircularProgress(document.querySelector('#weekly-progress-text').parentElement.querySelector('.circular-progress-fill'), weeklyProgress);
+            updateCircularProgress(document.querySelector('#monthly-progress-text').parentElement.querySelector('.circular-progress-fill'), monthlyProgress);
+
+            // Update text
+            document.getElementById('today-progress-text').textContent = `${todayProgress}%`;
+            document.getElementById('weekly-progress-text').textContent = `${weeklyProgress}%`;
+            document.getElementById('monthly-progress-text').textContent = `${monthlyProgress}%`;
+        }
+
+        function populateTodoStats() {
+            const todoStatsList = document.getElementById('todo-stats-list');
+            todoStatsList.innerHTML = '';
+
+            // Busiest/Least Busy Days
+            const daysOfWeek = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+            let busiestDay = { day: "", count: 0 };
+            let leastBusyDay = { day: "", count: Infinity };
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toISOString().split('T')[0];
+                const todos = JSON.parse(localStorage.getItem(`todo-${dateString}`)) || [];
+                const taskCount = todos.length;
+                const dayName = daysOfWeek[date.getDay()];
+
+                if (taskCount > busiestDay.count) {
+                    busiestDay = { day: dayName, count: taskCount };
+                }
+                if (taskCount < leastBusyDay.count) {
+                    leastBusyDay = { day: dayName, count: taskCount };
+                }
+            }
+
+            const busiestLi = document.createElement('li');
+            busiestLi.textContent = `가장 바쁜 요일: ${busiestDay.day} (${busiestDay.count}개 To-Do)`;
+            todoStatsList.appendChild(busiestLi);
+
+            const leastBusyLi = document.createElement('li');
+            leastBusyLi.textContent = `가장 한가한 요일: ${leastBusyDay.day} (${leastBusyDay.count}개 To-Do)`;
+            todoStatsList.appendChild(leastBusyLi);
+
+            // Frequent Todos (Placeholder)
+            const frequentLi = document.createElement('li');
+            frequentLi.textContent = '자주 하는 To-Do가 없습니다.';
+            todoStatsList.appendChild(frequentLi);
+        }
+
+        function showPostponedList() {
+            const postponedList = document.getElementById('postponedList');
+            postponedList.innerHTML = '';
+
+            let hasPostponed = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('todo-')) {
+                    const date = key.replace('todo-', '');
+                    const todos = JSON.parse(localStorage.getItem(key)) || [];
+                    todos.forEach(todo => {
+                        if (!todo.checked) {
+                            const li = document.createElement('li');
+                            li.textContent = `${todo.title} (${date})`;
+                            postponedList.appendChild(li);
+                            hasPostponed = true;
+                        }
+                    });
+                }
+            }
+
+            if (!hasPostponed) {
+                const li = document.createElement('li');
+                li.textContent = '미룬 To-Do가 없습니다.';
+                postponedList.appendChild(li);
+            }
+
+            document.getElementById('postponedPopup').style.display = 'flex';
+        }
+
+        function closePopup() {
+            document.getElementById('postponedPopup').style.display = 'none';
+        }
+
+        window.onload = function() {
+            calculateProgress();
+            populateTodoStats();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #E6F0FA; /* Pastel blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .app-container {
+            width: 375px;
+            height: 667px;
+            background-color: #E9FCF5;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #fff;
+            border-bottom: 1px solid #D1E3F6; /* Pastel blue border */
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .notifications-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .notification {
+            padding: 15px;
+            background-color: #D1E3F6; /* Pastel blue for notification cards */
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .notification-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .notification-time {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .clear-all-btn {
+            margin: 20px;
+            padding: 15px;
+            background-color: #87CEEB; /* Pastel blue accent for button */
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .clear-all-btn:hover {
+            background-color: #6CB9D8; /* Darker pastel blue on hover */
+        }
+
+        .nav-bar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #fff;
+            border-top: 1px solid #D1E3F6; /* Pastel blue border */
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-bar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #fff;
+    border-top: 1px solid #D1E3F6;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.nav-bar a {
+    text-decoration: none;
+    color: #666;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;           /* 바 전체 높이 기준 정렬 */
+    width: 100%;
+    padding: 5px 0;
+}
+
+.nav-bar a i {
+    font-size: 20px;
+    line-height: 1;
+    margin-bottom: 3px;     /* 아이콘과 텍스트 간 거리 조절 */
+}
+
+.nav-bar a.active {
+    color: #87CEEB;
+}
+
+
+        .nav-bar a.active {
+            color: #87CEEB; /* Pastel blue accent for active nav item */
+        }
+
+        .nav-bar a i {
+            font-size: 20px;
+        }
+        .emoji {
+    font-size: 20px;
+    display: block;
+    transform: translateY(2px); /* 또는 1~3px */
+}
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <a href="main.html">⬅️</a>
+            <h1>알림</h1>
+        </div>
+        <div class="notifications-container" id="notificationsContainer">
+            <div class="notification">
+                <div class="notification-title">스케줄 알림</div>
+                <div class="notification-time">Meeting Reminder - 2:30 PM</div>
+            </div>
+            <div class="notification">
+                <div class="notification-title">Event Alert</div>
+                <div class="notification-time">Tomorrow 10:00 AM</div>
+            </div>
+        </div>
+        <div class="clear-all-btn" id="clearAllBtn">알림 전체 지우기</div>
+        <div class="nav-bar">
+            <a href="main.html">
+                <span class="emoji">🏠</span>
+                <span>홈</span>
+            </a>
+            <a href="status.html" class="active">
+                <span class = "emoji">📊</span>
+                <span>리포트</span>
+            </a>
+            <a href="cal.html">
+                <span class ="emoji">📅</span>
+                <span>캘린더</span>
+            </a>
+            <a href="noti.html">
+                <span class ="emoji">🔔</span>
+                <span>알림</span>
+            </a>
+            <a href="set.html">
+                <span class="emoji">⚙️</span>
+                <span>설정</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const notificationsContainer = document.getElementById('notificationsContainer');
+
+        clearAllBtn.addEventListener('click', () => {
+            notificationsContainer.innerHTML = '';
+        });
+        
+    </script>
+</body>
+</html>

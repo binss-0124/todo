@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>학기 과제 앱 - 로그인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: #E6F0FA; /* Pastel blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .app-container {
+            width: 375px;
+            height: 667px;
+            background-color: #E9FCF5;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #fff;
+            border-bottom: 1px solid #D1E3F6; /* Pastel blue border */
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .login-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1E3F6; /* Pastel blue border */
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #D1E3F6; /* Pastel blue background */
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="email"]:focus, input[type="password"]:focus {
+            border-color: #87CEEB; /* Pastel blue accent on focus */
+            box-shadow: 0 0 5px rgba(135, 206, 235, 0.3);
+        }
+
+        .login-btn {
+            background-color: #87CEEB; /* Pastel blue accent for button */
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 12px 0;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background-color: #6CB9D8; /* Darker pastel blue on hover */
+            transform: translateY(-2px);
+        }
+
+        .links {
+            font-size: 13px;
+            color: #666; /* Lighter gray for secondary text */
+            margin-top: 10px;
+        }
+
+        .links a {
+            color: #87CEEB; /* Pastel blue accent for links */
+            text-decoration: none;
+            margin: 0 5px;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #6CB9D8; /* Darker pastel blue on hover */
+        }
+
+        .divider {
+            margin: 20px 0;
+            font-size: 12px;
+            color: #666;
+            position: relative;
+            width: 100%;
+            text-align: center;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background-color: #D1E3F6; /* Pastel blue for divider lines */
+        }
+
+        .divider::before {
+            left: 0;
+        }
+
+        .divider::after {
+            right: 0;
+        }
+
+        .google-btn, .kakao-btn {
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .google-btn {
+            background-color: #fff;
+            color: #4285f4; /* Keep Google's blue for text */
+            border: 1px solid #D1E3F6; /* Pastel blue border */
+        }
+
+        .google-btn:hover {
+            background-color: #D1E3F6; /* Pastel blue on hover */
+            transform: translateY(-2px);
+        }
+
+        .google-btn::before {
+            content: 'G';
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: #4285f4; /* Keep Google's blue for icon */
+            margin-right: 8px;
+        }
+
+        .kakao-btn {
+            background-color: #fee500; /* Keep Kakao's yellow */
+            color: #3c1e1e;
+            border: 1px solid #fee500;
+        }
+
+        .kakao-btn:hover {
+            background-color: #e4d100; /* Slightly darker yellow on hover */
+            transform: translateY(-2px);
+        }
+
+        .kakao-btn::before {
+            content: 'K';
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            color: #3c1e1e;
+            margin-right: 8px;
+        }
+        /* Google Button Styles (unchanged) */
+        .qJTHM{-webkit-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:"Roboto-Regular",arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{word-break:break-all}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-uaxL4e{-webkit-border-radius:10px;border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf,.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u>div:nth-child(1){background-color:#1a73e8!important}.P1ekSe-ZMv3u>div:nth-child(2),.P1ekSe-ZMv3u>div:nth-child(3){background-image:linear-gradient(to right,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(to right,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{-webkit-border-radius:4px;border-radius:4px;-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-webkit-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:"Google Sans",arial,sans-serif;font-size:14px;height:40px;letter-spacing:0.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:14px;height:32px;letter-spacing:0.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:11px;height:20px;letter-spacing:0.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{-webkit-border-radius:20px;border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{-webkit-border-radius:16px;border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{-webkit-border-radius:10px;border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{-webkit-border-top-left-radius:3px;border-top-left-radius:3px;-webkit-border-bottom-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;justify-content:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{-webkit-border-radius:3px;border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{-webkit-border-radius:18px;border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{-webkit-border-radius:14px;border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{-webkit-border-radius:8px;border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-flex-direction:row;flex-direction:row;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;flex-grow:1;font-family:"Google Sans",arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:hover,.nsm7Bb-HzV7m-LgbsSe:focus{-webkit-box-shadow:none;box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.04)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{-webkit-border-radius:50%;border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:"Roboto";font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{-webkit-border-top-left-radius:0;border-top-left-radius:0;-webkit-border-bottom-left-radius:0;border-bottom-left-radius:0;-webkit-border-top-right-radius:3px;border-top-right-radius:3px;-webkit-border-bottom-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{-webkit-border-radius:18px;border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{-webkit-border-radius:4px;border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>로그인</h1>
+        </div>
+        <div class="login-container">
+            <form onsubmit="return login(event)">
+                <div class="form-group">
+                    <input type="email" id="email" placeholder="email@daejin.ac.kr" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="비밀번호" required>
+                </div>
+                <button type="submit" class="login-btn">로그인</button>
+            </form>
+            <div class="links">
+                <a href="findidpw.html">ID/PW 찾기</a> | <a href="login2.html">회원가입</a>
+            </div>
+            <div class="divider">or continue with</div>
+            <button class="google-btn" onclick="handleGoogleSignIn()">구글로 계속하기</button>
+            <button class="kakao-btn" onclick="handleKakaoSignIn()">카카오로 계속하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 로그인 함수
+        function login(event) {
+            event.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (email && password) {
+                alert("로그인 시도: " + email);
+                window.location.href = "main.html"; // Redirect to index.html (calendar page)
+            } else {
+                alert("이메일과 비밀번호를 입력해주세요.");
+            }
+        }
+
+        // 구글 로그인 처리 함수
+        function handleGoogleSignIn() {
+            const clientId = "YOUR_GOOGLE_CLIENT_ID"; // Google Cloud Console에서 발급받은 클라이언트 ID로 교체
+            const redirectUri = "http://localhost:YOUR_PORT/login.html"; // 리디렉션 URI로 교체
+            const scope = "profile email"; // 요청할 권한 범위
+            const responseType = "token"; // 토큰 응답 유형
+
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+
+            window.location.href = authUrl; // 구글 인증 페이지로 리디렉션
+        }
+
+        // 카카오 로그인 처리 함수
+        function handleKakaoSignIn() {
+            const clientId = "YOUR_KAKAO_CLIENT_ID"; // 카카오 개발자 콘솔에서 발급받은 클라이언트 ID로 교체
+            const redirectUri = "http://localhost:YOUR_PORT/login.html"; // 리디렉션 URI로 교체
+            const responseType = "code"; // 카카오는 'code' 사용
+
+            const authUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}`;
+
+            window.location.href = authUrl; // 카카오 인증 페이지로 리디렉션
+        }
+
+        // URL에서 토큰 처리 (리디렉션 후)
+        window.onload = function() {
+            // 구글 로그인 처리
+            const hash = window.location.hash;
+            if (hash) {
+                const params = new URLSearchParams(hash.substring(1));
+                const accessToken = params.get("access_token");
+
+                if (accessToken) {
+                    // 토큰을 사용해 구글 사용자 정보 가져오기
+                    fetch(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${accessToken}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("구글 사용자 정보:", data);
+                            alert(`구글 로그인 성공! 환영합니다, ${data.name}`);
+                            window.location.href = "main.html"; // Redirect to index.html
+                        })
+                        .catch(error => {
+                            console.error("구글 사용자 정보 가져오기 실패:", error);
+                            alert("구글 로그인에 실패했습니다.");
+                        });
+                }
+            }
+
+            // 카카오 로그인 처리
+            const urlParams = new URLSearchParams(window.location.search);
+            const kakaoCode = urlParams.get("code");
+
+            if (kakaoCode) {
+                // 카카오 액세스 토큰 요청
+                const clientId = "YOUR_KAKAO_CLIENT_ID"; // 카카오 클라이언트 ID
+                const redirectUri = "http://localhost:YOUR_PORT/login.html"; // 리디렉션 URI
+                const tokenUrl = `https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id=${clientId}&redirect_uri=${redirectUri}&code=${kakaoCode}`;
+
+                fetch(tokenUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const accessToken = data.access_token;
+                    if (accessToken) {
+                        // 카카오 사용자 정보 가져오기
+                        fetch("https://kapi.kakao.com/v2/user/me", {
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(userData => {
+                            console.log("카카오 사용자 정보:", userData);
+                            alert(`카카오 로그인 성공! 환영합니다, ${userData.properties.nickname}`);
+                            window.location.href = "main.html"; // Redirect to index.html
+                        })
+                        .catch(error => {
+                            console.error("카카오 사용자 정보 가져오기 실패:", error);
+                            alert("카카오 로그인에 실패했습니다.");
+                        });
+                    } else {
+                        alert("카카오 액세스 토큰을 가져오지 못했습니다.");
+                    }
+                })
+                .catch(error => {
+                    console.error("카카오 토큰 요청 실패:", error);
+                    alert("카카오 로그인에 실패했습니다.");
+                });
+            }
+        };
+    </script>
+</body>
+</html>

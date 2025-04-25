@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Event - To-Do</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background-color: #E6F0FA;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .app-container {
+      width: 375px;
+      height: 667px;
+      background-color: #E9FCF5;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .header {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #fff;
+      border-bottom: 1px solid #D1E3F6;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .notification {
+      position: absolute;
+      right: 20px;
+      top: 15px;
+      font-size: 22px;
+      text-decoration: none;
+      color: #333;
+    }
+
+    .form-container {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #D1E3F6;
+      border-radius: 8px;
+      background-color: #D1E3F6;
+      outline: none;
+      width: 100%;
+    }
+
+    .time-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .period-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .label-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .show-calendar-btn {
+      width: 40px;
+      height: 40px;
+      background-color: #87CEEB;
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .selected-period {
+      font-size: 14px;
+      color: #333;
+      white-space: nowrap;
+    }
+
+    .save-btn {
+      padding: 15px;
+      background-color: #87CEEB;
+      color: #fff;
+      text-align: center;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .save-btn:hover {
+      background-color: #6CB9D8;
+    }
+
+    .nav-bar {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #fff;
+      border-top: 1px solid #D1E3F6;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .nav-bar a {
+      text-decoration: none;
+      color: #666;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .emoji {
+      font-size: 20px;
+      transform: translateY(2px);
+    }
+
+    .nav-bar a.active {
+      color: #87CEEB;
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .calendar-header h2 {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .calendar-grid .day-name {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .calendar-grid .day {
+      background-color: #D1E3F6;
+      border-radius: 5px;
+      padding: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .calendar-grid .day.selected {
+      background-color: #87CEEB;
+      color: #fff;
+    }
+
+    .calendar-grid .day.empty {
+      background-color: transparent;
+      cursor: default;
+    }
+
+    .calendar-controls {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .calendar-controls button {
+      padding: 8px 15px;
+      background-color: #87CEEB;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .calendar-controls button:hover {
+      background-color: #6CB9D8;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <a href="main.html">⬅️</a>
+      <h1>일정 추가</h1>
+      <a class="notification" href="noti.html">🔔</a>
+    </div>
+
+    <div class="form-container">
+      <div class="form-group">
+        <label for="event-title">일정</label>
+        <input type="text" id="event-title" placeholder="Enter event title">
+      </div>
+      <div class="form-group">
+        <label for="memo">메모</label>
+        <input type="text" id="memo" placeholder="Enter memo">
+      </div>
+      <div class="form-group">
+        <div class="period-group">
+          <label>기간 설정</label>
+          <div class="label-container">
+            <div class="selected-period" id="selectedPeriod">기간을 선택하세요</div>
+            <div class="show-calendar-btn" id="showCalendarBtn">📅</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>시간</label>
+        <div class="time-group">
+          <select id="start-time"><option value="">시작 시간</option></select>
+          <select id="end-time"><option value="">종료 시간</option></select>
+        </div>
+      </div>
+      <div class="save-btn" id="saveBtn">추가하기</div>
+    </div>
+
+    <div class="nav-bar">
+      <a href="main.html"><span class="emoji">🏠</span><span>홈</span></a>
+      <a href="status.html"><span class="emoji">📊</span><span>리포트</span></a>
+      <a href="cal.html"><span class="emoji">📅</span><span>캘린더</span></a>
+      <a href="todo.html"><span class="emoji">📝</span><span>할일</span></a>
+      <a href="set.html"><span class="emoji">⚙️</span><span>설정</span></a>
+    </div>
+  </div>
+
+  <div id="calendarPopup" class="popup">
+    <div class="popup-content">
+      <div class="calendar-header">
+        <button id="prevMonth">◄</button>
+        <h2 id="calendarMonthYear"></h2>
+        <button id="nextMonth">►</button>
+      </div>
+      <div id="calendarGrid" class="calendar-grid"></div>
+      <div class="calendar-controls">
+        <button id="confirmDate">확인</button>
+        <button id="cancelDate">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const startTime = document.getElementById('start-time');
+    const endTime = document.getElementById('end-time');
+    const showCalendarBtn = document.getElementById('showCalendarBtn');
+    const selectedPeriod = document.getElementById('selectedPeriod');
+    const saveBtn = document.getElementById('saveBtn');
+    const calendarPopup = document.getElementById('calendarPopup');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarMonthYear = document.getElementById('calendarMonthYear');
+    const prevMonth = document.getElementById('prevMonth');
+    const nextMonth = document.getElementById('nextMonth');
+    const confirmDate = document.getElementById('confirmDate');
+    const cancelDate = document.getElementById('cancelDate');
+
+    let selectedDate = null;
+    let currentYear, currentMonth;
+
+    function populateTimeDropdowns() {
+      const times = [];
+      for (let hour = 0; hour < 24; hour++) {
+        for (let min = 0; min < 60; min += 30) {
+          let time = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+          times.push(time);
+        }
+      }
+      times.forEach(time => {
+        startTime.innerHTML += `<option value="${time}">${time}</option>`;
+        endTime.innerHTML += `<option value="${time}">${time}</option>`;
+      });
+    }
+
+    function generateCalendar(year, month) {
+      const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+      calendarMonthYear.textContent = `${year}년 ${months[month]}`;
+
+      calendarGrid.innerHTML = '';
+
+      const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+      daysOfWeek.forEach(day => {
+        const dayName = document.createElement('div');
+        dayName.className = 'day-name';
+        dayName.textContent = day;
+        calendarGrid.appendChild(dayName);
+      });
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDate = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'day empty';
+        calendarGrid.appendChild(emptyDay);
+      }
+
+      for (let day = 1; day <= lastDate; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'day';
+        dayElement.textContent = day;
+
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        if (selectedDate === dateStr) {
+          dayElement.classList.add('selected');
+        }
+
+        dayElement.addEventListener('click', () => {
+          selectedDate = dateStr;
+          document.querySelectorAll('.calendar-grid .day').forEach(d => d.classList.remove('selected'));
+          dayElement.classList.add('selected');
+        });
+
+        calendarGrid.appendChild(dayElement);
+      }
+    }
+
+    function saveTodo() {
+      const title = document.getElementById('event-title').value.trim();
+      const memo = document.getElementById('memo').value.trim();
+      const startTimeValue = startTime.value;
+
+      // Validation
+      if (!title) {
+        alert('일정 제목을 입력해주세요.');
+        return;
+      }
+      if (!selectedDate) {
+        alert('날짜를 선택해주세요.');
+        return;
+      }
+      if (!startTimeValue) {
+        alert('시작 시간을 선택해주세요.');
+        return;
+      }
+
+      const todo = {
+        title,
+        memo,
+        time: startTimeValue,
+        checked: false
+      };
+
+      const dateKey = `todo-${selectedDate}`;
+      let todos = [];
+      try {
+        const storedTodos = localStorage.getItem(dateKey);
+        todos = storedTodos ? JSON.parse(storedTodos) : [];
+        if (!Array.isArray(todos)) {
+          todos = [];
+        }
+      } catch (e) {
+        console.error('Error parsing localStorage todos:', e);
+      }
+
+      todos.push(todo);
+      try {
+        localStorage.setItem(dateKey, JSON.stringify(todos));
+        console.log(`Saved todo for ${dateKey}:`, todo); // Debug log
+      } catch (e) {
+        console.error('Error saving to localStorage:', e);
+        alert('일정 저장에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      alert('추가되었습니다');
+      window.location.href = 'todo.html';
+    }
+
+    // Event Listeners
+    showCalendarBtn.onclick = () => {
+      calendarPopup.style.display = 'flex';
+      const today = new Date();
+      currentYear = today.getFullYear();
+      currentMonth = today.getMonth();
+      generateCalendar(currentYear, currentMonth);
+    };
+
+    prevMonth.onclick = () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      generateCalendar(currentYear, currentMonth);
+    };
+
+    nextMonth.onclick = () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      generateCalendar(currentYear, currentMonth);
+    };
+
+    confirmDate.onclick = () => {
+      if (selectedDate) {
+        selectedPeriod.textContent = selectedDate;
+        calendarPopup.style.display = 'none';
+      } else {
+        alert('날짜를 선택해주세요.');
+      }
+    };
+
+    cancelDate.onclick = () => {
+      selectedDate = null;
+      selectedPeriod.textContent = '기간을 선택하세요';
+      calendarPopup.style.display = 'none';
+    };
+
+    saveBtn.onclick = saveTodo;
+
+    // Initialize
+    populateTimeDropdowns();
+  </script>
+</body>
+</html>
